@@ -178,7 +178,7 @@ public class RSSViewer extends AppCompatActivity {
         }
     }
 
-    public static View configureView(LinearLayout layout, RSS_NewsModel.FeedItem item){
+    public static View configureView(LinearLayout layout, RSS_NewsModel.FeedItem item) {
         TextView newsDesc = (TextView) layout.findViewById(R.id.newsItemDesc);
         ImageView newsImg = (ImageView) layout.findViewById(R.id.newsItemImg);
         TextView newsDate = (TextView) layout.findViewById(R.id.newsItemDate);
