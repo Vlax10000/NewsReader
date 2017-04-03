@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Android RSS Reader</string>
+    <string name="rssURL">http://www.24sata.hr/feeds/najnovije.xml</string>
+
+</resources>
