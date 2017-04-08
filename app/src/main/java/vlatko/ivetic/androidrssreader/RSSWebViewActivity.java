@@ -1,6 +1,9 @@
 package vlatko.ivetic.androidrssreader;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -27,6 +30,14 @@ public class RSSWebViewActivity extends AppCompatActivity {
         webView = (WebView) findViewById(R.id.webview);
         webView.setWebViewClient(new WebViewClient());
 
+        if(!connectionActive()){
+            Context context = getApplicationContext();
+            CharSequence text = "No Internet connection.\nPlease try again later.";
+            int duration = Toast.LENGTH_LONG;
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+        }
+
         if (!webView.post(new Runnable() {
             @Override
             public void run() {
@@ -34,6 +45,17 @@ public class RSSWebViewActivity extends AppCompatActivity {
             }
         })) {
             Toast.makeText(RSSWebViewActivity.this, "Something went Wrong\nPlease try again.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public boolean connectionActive() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        if (netInfo != null && netInfo.isConnectedOrConnecting()){
+            return true;
+        }
+        else{
+            return false;
         }
     }
 }
