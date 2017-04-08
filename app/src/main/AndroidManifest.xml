@@ -12,18 +12,18 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".RSSViewer">
+        <activity android:name=".RSSReader">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".RSSViewActivity"
-            android:parentActivityName=".RSSViewer">
+        <activity android:name=".RSSWebViewActivity"
+            android:parentActivityName=".RSSReader">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".RSSViewer" />
+                android:value=".RSSReader" />
         </activity>
     </application>
 

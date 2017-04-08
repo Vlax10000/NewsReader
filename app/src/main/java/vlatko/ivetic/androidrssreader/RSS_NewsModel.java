@@ -15,10 +15,11 @@ import java.util.List;
 
 /**
  * Created by Vlatko on 26.3.2017..
+ * Class rapresents a data model for the RSS reader.
  */
 public class RSS_NewsModel {
 
-    private ArrayList<FeedItem> newsFeed = null;
+    private ArrayList<FeedItem> _newsFeed = null;
 
     private String _channel = null;
     private String _title = null;
@@ -27,9 +28,6 @@ public class RSS_NewsModel {
     private String _publishDate = null;
     private String _urlString = null;
     private XmlPullParserFactory _xmlFactoryObject = null;
-    private volatile boolean _parsingComplete = false;
-    private static final int URL_BEGIN = 5;
-    private static final int URL_END = 5;
 
     public RSS_NewsModel(String url) {
         this._urlString = url;
@@ -52,50 +50,49 @@ public class RSS_NewsModel {
     }
 
     public int getSize() {
-        return newsFeed.size();
+        return _newsFeed.size();
     }
 
     public FeedItem getItem(int itemIndex) {
-        return newsFeed.get(itemIndex);
+        return _newsFeed.get(itemIndex);
     }
 
     public List<FeedItem> updateNews() {
-        this.newsFeed = new ArrayList<>();
-        _parsingComplete = false;
+        this._newsFeed = new ArrayList<>();
         fetchAndParseXML();
 
-        for (FeedItem item : newsFeed) {
+        for (FeedItem item : _newsFeed) {
             extractDescription(item);
-            loadImage(item);
+            extractPublishDate(item);
         }
 
-        return newsFeed;
+        return _newsFeed;
     }
 
     private void extractDescription(FeedItem feedItem) {
-        Log.i("desc", feedItem.description);
         // full description tag text is logged under regex "desc"
         // this method splits its contents into FeedItem class attributes
+        // Log.i("desc", feedItem.description);
 
         String[] descrStrParts = feedItem.description.split(" /> ");
         String[] imgProperties = descrStrParts[0].split(" ");
 
-        // all magic numbers are calculated by optical examination of the log that is,
-        // unfortunately, specific for this feed
         feedItem.imgURL = imgProperties[1].substring(5, imgProperties[1].length() - 1);
         feedItem.description = descrStrParts[1];
-
-        String tmpDate = feedItem.pubDate.split(":")[0];
-        feedItem.pubDate = tmpDate.substring(0, tmpDate.length()-2);
     }
 
-    private void loadImage(FeedItem item) {
-        try {
-            InputStream is = (InputStream) new URL(item.imgURL).getContent();
-            item.img = Drawable.createFromStream(is, "src");
-        } catch (Exception e) {
-            Log.d("img", "Loading image failed!");
-        }
+    private void extractPublishDate(FeedItem feedItem) {
+        // full pubDate tag text is logged under regex "date"
+        // this method splits its contents into FeedItem class attributes
+        // Log.i("date", feedItem.pubDate);
+
+        String[] tmpDate = feedItem.pubDate.split(":");
+        int length = tmpDate[0].length();
+
+        feedItem.pubDate = tmpDate[0].substring(0, length-2);
+
+        int hours = Integer.parseInt(tmpDate[0].substring(length-2, length)) + 2;
+        feedItem.pubDate += String.format(", %d:%s", hours, tmpDate[1]);
     }
 
 
@@ -160,7 +157,7 @@ public class RSS_NewsModel {
                             } else if (name.equals("description")) {
                                 item.description = text;
                             } else if (name.equals("item")) {
-                                newsFeed.add(item);
+                                _newsFeed.add(item);
                             } else {
                             }
                         } else {
@@ -181,8 +178,6 @@ public class RSS_NewsModel {
 
                 event = myParser.next();
             }
-
-            _parsingComplete = true;
         } catch (Exception e) {
             e.printStackTrace();
         }
