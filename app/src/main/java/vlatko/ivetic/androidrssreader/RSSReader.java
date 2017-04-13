@@ -2,6 +2,10 @@ package vlatko.ivetic.androidrssreader;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.TypedArray;
+import android.graphics.Canvas;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -55,6 +59,10 @@ public class RSSReader extends AppCompatActivity {
         layoutManager.scrollToPosition(0);
         _newsView.setLayoutManager(layoutManager);
 
+        RecyclerView.ItemDecoration itemDecoration = new
+                DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST);
+        _newsView.addItemDecoration(itemDecoration);
+
         _newsAdapter.setOnItemClickListener(new RSSViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
@@ -92,72 +100,83 @@ public class RSSReader extends AppCompatActivity {
     public boolean newsFeedEmpty() {
         return _newsModel.getSize() == 0;
     }
-}
 
-//    public class NewsListAdapter extends BaseAdapter {
-//
-//        private List<RSS_NewsModel.FeedItem> feedItemList;
-//        private Context context;
-//
-//        public NewsListAdapter(Context context, List<RSS_NewsModel.FeedItem> feedItemList) {
-//            this.feedItemList = feedItemList;
-//            this.context = context;
-//        }
-//
-//        @Override
-//        public int getCount() {
-//            return feedItemList.size();
-//        }
-//
-//        @Override
-//        public RSS_NewsModel.FeedItem getItem(int position) {
-//            return feedItemList.get(position);
-//        }
-//
-//        @Override
-//        public long getItemId(int position) {
-//            return position;
-//        }
-//
-//        @Override
-//        public View getView(int position, View convertView, ViewGroup parent) {
-//            //NewsItemView view;
-//            LayoutInflater infl = LayoutInflater.from(getApplication());
-//            LinearLayout layout;
-//
-//            /*if (convertView == null) {
-//                view = new NewsItemView(context, getItem(position));
-//            } else {
-//                view = (NewsItemView) convertView;
-//            }
-//
-//            view.configure(layout, feedItemList.get(position));
-//            return view;*/
-//
-//            if (convertView == null) {
-//                layout = (LinearLayout) infl.inflate(R.layout.news_item_view, null);
-//            } else {
-//                layout = (LinearLayout) convertView;
-//            }
-//
-//            return configureView(context, layout, feedItemList.get(position));
-//
-//        }
-//    }
-//
-//    public static View configureView(Context context, LinearLayout layout, RSS_NewsModel.FeedItem item) {
-//        TextView newsDesc = (TextView) layout.findViewById(R.id.newsItemDesc);
-//        ImageView newsImg = (ImageView) layout.findViewById(R.id.newsItemImg);
-//        TextView newsDate = (TextView) layout.findViewById(R.id.newsItemDate);
-//
-//        Glide
-//                .with(context)
-//                .load(item.getImgURL())
-//                .into(newsImg);
-//        newsImg.setImageDrawable(item.getImage());
-//        newsDesc.setText(item.getDescription());
-//        newsDate.setText(item.getPubDate());
-//
-//        return layout;
-//    }
-//}
+    public class DividerItemDecoration extends RecyclerView.ItemDecoration {
+
+        private final int[] ATTRS = new int[]{
+                android.R.attr.listDivider
+        };
+
+        public static final int HORIZONTAL_LIST = LinearLayoutManager.HORIZONTAL;
+
+        public static final int VERTICAL_LIST = LinearLayoutManager.VERTICAL;
+
+        private Drawable mDivider;
+
+        private int mOrientation;
+
+        public DividerItemDecoration(Context context, int orientation) {
+            final TypedArray a = context.obtainStyledAttributes(ATTRS);
+            mDivider = a.getDrawable(0);
+            a.recycle();
+            setOrientation(orientation);
+        }
+
+        public void setOrientation(int orientation) {
+            if (orientation != HORIZONTAL_LIST && orientation != VERTICAL_LIST) {
+                throw new IllegalArgumentException("invalid orientation");
+            }
+            mOrientation = orientation;
+        }
+
+        @Override
+        public void onDraw(Canvas c, RecyclerView parent) {
+            if (mOrientation == VERTICAL_LIST) {
+                drawVertical(c, parent);
+            } else {
+                drawHorizontal(c, parent);
+            }
+        }
+
+        public void drawVertical(Canvas c, RecyclerView parent) {
+            final int left = parent.getPaddingLeft();
+            final int right = parent.getWidth() - parent.getPaddingRight();
+
+            final int childCount = parent.getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                final View child = parent.getChildAt(i);
+                final RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child
+                        .getLayoutParams();
+                final int top = child.getBottom() + params.bottomMargin;
+                final int bottom = top + mDivider.getIntrinsicHeight();
+                mDivider.setBounds(left, top, right, bottom);
+                mDivider.draw(c);
+            }
+        }
+
+        public void drawHorizontal(Canvas c, RecyclerView parent) {
+            final int top = parent.getPaddingTop();
+            final int bottom = parent.getHeight() - parent.getPaddingBottom();
+
+            final int childCount = parent.getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                final View child = parent.getChildAt(i);
+                final RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child
+                        .getLayoutParams();
+                final int left = child.getRight() + params.rightMargin;
+                final int right = left + mDivider.getIntrinsicHeight();
+                mDivider.setBounds(left, top, right, bottom);
+                mDivider.draw(c);
+            }
+        }
+
+        @Override
+        public void getItemOffsets(Rect outRect, int itemPosition, RecyclerView parent) {
+            if (mOrientation == VERTICAL_LIST) {
+                outRect.set(0, 0, 0, mDivider.getIntrinsicHeight());
+            } else {
+                outRect.set(0, 0, mDivider.getIntrinsicWidth(), 0);
+            }
+        }
+    }
+}

@@ -10,8 +10,12 @@ import org.xmlpull.v1.XmlPullParserFactory;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by Vlatko on 26.3.2017..
@@ -29,7 +33,11 @@ public class RSS_NewsModel {
     private String _urlString = null;
     private XmlPullParserFactory _xmlFactoryObject = null;
 
+    private SimpleDateFormat _dateFormatIN = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.getDefault());
+    private SimpleDateFormat _dateFormatOUT = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm", Locale.getDefault());
+
     public RSS_NewsModel(String url) {
+        this._dateFormatIN.setTimeZone(java.util.TimeZone.getTimeZone("CET"));
         this._urlString = url;
     }
 
@@ -72,7 +80,7 @@ public class RSS_NewsModel {
     private void extractDescription(FeedItem feedItem) {
         // full description tag text is logged under regex "desc"
         // this method splits its contents into FeedItem class attributes
-        // Log.i("desc", feedItem.description);
+//        Log.i("desc", feedItem.description);
 
         String[] descrStrParts = feedItem.description.split(" /> ");
         String[] imgProperties = descrStrParts[0].split(" ");
@@ -84,17 +92,18 @@ public class RSS_NewsModel {
     private void extractPublishDate(FeedItem feedItem) {
         // full pubDate tag text is logged under regex "date"
         // this method splits its contents into FeedItem class attributes
-        // Log.i("date", feedItem.pubDate);
+        Log.i("date", feedItem.pubDate);
 
-        String[] tmpDate = feedItem.pubDate.split(":");
-        int length = tmpDate[0].length();
+        try {
+            feedItem.date = _dateFormatIN.parse(feedItem.getPubDate());
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
 
-        feedItem.pubDate = tmpDate[0].substring(0, length-2);
-
-        int hours = Integer.parseInt(tmpDate[0].substring(length-2, length)) + 2;
-        feedItem.pubDate += String.format(", %d:%s", hours, tmpDate[1]);
+        feedItem.pubDate = _dateFormatOUT.format(feedItem.date);
     }
 
+    // kreso8oreskovic-gmail.com
 
     public void fetchAndParseXML() {
         try {
@@ -193,6 +202,7 @@ public class RSS_NewsModel {
         private String pubDate = null;
         private String imgURL = null;
 
+        private Date date;
         private Drawable img = null;
 
         public String getTitle() {

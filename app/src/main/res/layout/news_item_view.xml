@@ -1,25 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    >
 
     <TextView
         android:id="@+id/newsItemDesc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="#000000"/>
+        android:textColor="#000000"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"/>
 
     <ImageView
         android:id="@+id/newsItemImg"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp" />
 
     <TextView
         android:id="@+id/newsItemDate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="#000000"
-        android:textAlignment="viewEnd"/>
+        android:textAlignment="viewEnd"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp" />
 
 
 </LinearLayout>
